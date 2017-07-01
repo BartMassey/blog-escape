@@ -24,5 +24,19 @@ Useful links:
 [MySQLdb doc](http://mysqlclient.readthedocs.io),
 [ATOM RFC](http://tools.ietf.org/html/rfc4287).
 
+Done:
+
+* Extract title, body and type of blog nodes
+* Store in blog nodes in files named by node id
+
+To Do:
+
+* Give the nodes a filetype-based extension
+* Filter internal reference URLs in some sane way
+* Deal with (B) and other smileys
+* Get static pages out as well as blog nodes
+* Figure out how image attachment works and rescue images
+* Extract comments and attach them somehow
+
 This work is made available under the MIT license. Please
 see the file `COPYING` in this distribution for license terms.
