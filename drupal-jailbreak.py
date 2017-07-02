@@ -12,9 +12,7 @@ import sys
 import MySQLdb
 import MySQLdb.cursors
 
-db = MySQLdb.connect(user="drupal_fob",
-                     db="drupal_fob",
-                     read_default_file="~/.drupal_jailbreak.my.cnf")
+db = MySQLdb.connect(read_default_file="~/.drupal_jailbreak.my.cnf")
 
 c = db.cursor()
 c.execute("""SELECT format, name FROM filter_format""")
