@@ -44,7 +44,7 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
              ON node.nid = field_data_body.entity_id
              WHERE node.type = \"blog\"""")
 for nid, title, body, fformat in c:
-    with open("nodes/%d.%s" % (nid, formats[fformat]), "w") as node_file:
+    with open("node/%d.%s" % (nid, formats[fformat]), "w") as node_file:
         print("title: %s" % (title,), file=node_file)
         print(file=node_file)
         print(body, file=node_file)
