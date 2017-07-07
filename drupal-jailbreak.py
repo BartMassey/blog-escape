@@ -55,4 +55,5 @@ for nid, title, body, fformat in c:
     with open(fn, "w") as node_file:
         print("title: %s" % (title,), file=node_file)
         print(file=node_file)
-        print(body, file=node_file)
+        for line in body.splitlines():
+            print(line, file=node_file)
