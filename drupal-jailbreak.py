@@ -25,26 +25,34 @@ def get_formats(pattern):
                  WHERE upper(name) LIKE %s""", ("%" + pattern + "%",))
     return [fformat for fformat, in c]
 
+# Build the format -> suffix dictionary.
 format_types = [
-    ("html", "HTML"), 
-    ("md", "MARKDOWN"),
-    ("txt", "TEXT"),
-    ("php", "PHP"),
-    ("bbcode", "BBCODE")
+    ("HTML", "html"), 
+    ("MARKDOWN", "md"),
+    ("TEXT", "txt"),
+    ("PHP", "php"),
+    ("BBCODE", "bbcode")
 ]
-
 formats = dict()
-for suffix, pattern in format_types:
+for pattern, suffix in format_types:
     for fformat in get_formats(pattern):
         formats[fformat] = suffix
 
+# Extract node contents and store in files.
+# Captions are represented in field_data_body with
+# body_format NULL somehow.
 c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
                     field_data_body.body_format
              FROM node JOIN field_data_body
              ON node.nid = field_data_body.entity_id
-             WHERE node.type = \"blog\"""")
+             WHERE field_data_body.body_format IS NOT NULL""")
 for nid, title, body, fformat in c:
-    with open("node/%d.%s" % (nid, formats[fformat]), "w") as node_file:
+    if fformat in formats:
+        fn = "node/%d.%s" % (nid, formats[fformat])
+    else:
+        print("node %d: unknown format %s" % (nid, fformat))
+        continue
+    with open(fn, "w") as node_file:
         print("title: %s" % (title,), file=node_file)
         print(file=node_file)
         print(body, file=node_file)
