@@ -7,7 +7,12 @@
 # Pull the content out of a Drupal site into
 # portable formats.
 
+# Directory where content is to be stored.
+output_dir = "content"
+
 import sys
+import os
+import os.path as osp
 
 import MySQLdb
 import MySQLdb.cursors
@@ -39,6 +44,13 @@ for pattern, suffix in format_types:
     for fformat in get_formats(pattern):
         formats[fformat] = suffix
 
+# Empty or create the output directory.
+if osp.isdir(output_dir):
+    for fn in os.listdir(output_dir):
+        os.remove(output_dir + "/" + fn)
+else:
+    os.mkdir(output_dir)
+
 # Extract node contents and store in files.
 # Captions are represented in field_data_body with
 # body_format NULL somehow.
@@ -49,7 +61,7 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
              WHERE field_data_body.body_format IS NOT NULL""")
 for nid, title, body, fformat in c:
     if fformat in formats:
-        fn = "node/%d.%s" % (nid, formats[fformat])
+        fn = "%s/%d.%s" % (output_dir, nid, formats[fformat])
     else:
         print("node %d: unknown format %s" % (nid, fformat))
         continue
