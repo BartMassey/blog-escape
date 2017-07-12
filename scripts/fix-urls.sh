@@ -8,4 +8,7 @@ then
     exit 1
 fi
 BASE_URL=`echo "$1" | sed 's/\./\\./g'`
-sed "s@\(href\|HREF\) *= *\"https\?://${BASE_URL}/node/\([^\"]*\)@href=\"/node/\\2@g"
+sed \
+  -e "s@\(href\|HREF\) *= *\"https\?://${BASE_URL}/\([^\"]*\)@href=\"/\\2@g" \
+  -e "s@\(src\|SRC\) *= *\"https\?://${BASE_URL}/\([^\"]*\)@href=\"/\\1@g" \
+  -e "s@href=\"/system/files/@href=\"/files/@g"
