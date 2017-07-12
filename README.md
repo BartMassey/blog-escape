@@ -74,8 +74,10 @@ We will assume that the domain name of your sitename is
 
 ### To Do
 
-* Deal with (B) and other smileys.
 * Rescue Markdown nodes.
+* Add appropriate HTML wrapper to nodes.
+* Prepend title and date to node content.
+* Deal with (B) and other smileys.
 * Rescue BBCode nodes (ugh).
 * Rescue image nodes.
 * Attach comment nodes to parents somehow.
