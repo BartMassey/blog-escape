@@ -33,7 +33,6 @@ def get_formats(pattern):
 # Build the format -> suffix dictionary.
 format_types = [
     ("HTML", "html"), 
-    ("EASY HTML", "htm"),
     ("MARKDOWN", "md"),
     ("TEXT", "txt"),
     ("PHP", "php"),

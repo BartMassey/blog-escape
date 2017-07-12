@@ -41,7 +41,7 @@ To Do:
 Limitations:
 
 * Right now, some of the details of content formats as
-  encoded in the tool are specific to my blog site.  There
+  encoded in the tool are pretty heuristic.  There
   should be a configurable mechanism for mapping content
   formats to extensions.
 
