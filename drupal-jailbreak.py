@@ -13,6 +13,7 @@ output_dir = "content"
 import sys
 import os
 import os.path as osp
+import subprocess
 
 import MySQLdb
 import MySQLdb.cursors
@@ -69,3 +70,7 @@ for nid, title, body, fformat in c:
         print(file=node_file)
         for line in body.splitlines():
             print(line, file=node_file)
+
+# Run the content converters on the new content.
+assert len(sys.argv) == 2
+subprocess.call(["scripts/convert-content.sh", sys.argv[1]])
