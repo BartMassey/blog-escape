@@ -15,3 +15,4 @@ def filter_nl(content):
     # Replace remaining CRs.
     content = re.sub(r'\r', '', content)
     # All done.
+    return content

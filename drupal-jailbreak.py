@@ -90,6 +90,6 @@ for nid, title, body, fformat in c:
     with open("%s/%s" % (content_dir, fn), "w") as content_file:
         content_file.write(body)
     bodynl = filter_nl(body)
-    formatted = formatters[ftype](body, sitename, title)
+    formatted = formatters[ftype](bodynl, sitename, title)
     with open("%s/%s" % (node_dir, fn), "w") as node_file:
         node_file.write(formatted)
