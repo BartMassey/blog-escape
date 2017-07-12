@@ -10,5 +10,6 @@ fi
 BASE_URL=`echo "$1" | sed 's/\./\\./g'`
 sed \
   -e "s@\(href\|HREF\) *= *\"https\?://${BASE_URL}/\([^\"]*\)@href=\"/\\2@g" \
-  -e "s@\(src\|SRC\) *= *\"https\?://${BASE_URL}/\([^\"]*\)@href=\"/\\1@g" \
-  -e "s@href=\"/system/files/@href=\"/files/@g"
+  -e "s@\(src\|SRC\) *= *\"https\?://${BASE_URL}/\([^\"]*\)@src=\"/\\1@g" \
+  -e "s@\(src\|href\)=\"/system/files/@\\1=\"/files/@g" \
+  -e "s@\(src\|href\)=\"/files/images/@\\1=\"/files/@g"
