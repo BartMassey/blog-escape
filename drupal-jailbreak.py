@@ -87,9 +87,9 @@ for nid, title, body, fformat in c:
     else:
         print("node %d: unknown format %s" % (nid, fformat))
         continue
+    body = filter_nl(body)
     with open("%s/%s" % (content_dir, fn), "w") as content_file:
         content_file.write(body)
-    bodynl = filter_nl(body)
-    formatted = formatters[ftype](bodynl, sitename, title)
+    formatted = formatters[ftype](body, sitename, title)
     with open("%s/%s" % (node_dir, fn), "w") as node_file:
         node_file.write(formatted)
