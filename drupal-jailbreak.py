@@ -7,16 +7,25 @@
 # Pull the content out of a Drupal site into
 # portable formats.
 
-# Directory where content is to be stored.
-output_dir = "content"
+# Directory where raw content is to be stored.
+content_dir = "content"
+
+# Directory where processed content is to be stored.
+node_dir = "node"
 
 import sys
 import os
 import os.path as osp
-import subprocess
 
 import MySQLdb
 import MySQLdb.cursors
+
+from filter_nl import filter_nl
+from format_html import format_html
+
+# Get the sitename from the command line.
+assert len(sys.argv) == 2
+sitename = sys.argv[1]
 
 # Connect to the database using the information specified
 # in the cnf file.
@@ -44,12 +53,22 @@ for pattern, suffix in format_types:
     for fformat in get_formats(pattern):
         formats[fformat] = suffix
 
-# Empty or create the output directory.
-if osp.isdir(output_dir):
-    for fn in os.listdir(output_dir):
-        os.remove(output_dir + "/" + fn)
-else:
-    os.mkdir(output_dir)
+# Empty or create the given directory.
+def clean_dir(dir):
+    if osp.isdir(dir):
+        for fn in os.listdir(dir):
+            os.remove(dir + "/" + fn)
+    else:
+        os.mkdir(dir)
+
+# Clean the work directories.
+clean_dir(content_dir)
+clean_dir(node_dir)
+
+# Set up the formatters.
+formatters = {
+    "html" : format_html
+}
 
 # Extract node contents and store in files.
 # Captions are represented in field_data_body with
@@ -61,16 +80,16 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
              WHERE field_data_body.body_format IS NOT NULL""")
 for nid, title, body, fformat in c:
     if fformat in formats:
-        fn = "%s/%d.%s" % (output_dir, nid, formats[fformat])
+        ftype = formats[fformat]
+        if ftype != "html":
+            continue
+        fn = "%d.%s" % (nid, ftype)
     else:
         print("node %d: unknown format %s" % (nid, fformat))
         continue
-    with open(fn, "w") as node_file:
-        print("title: %s" % (title,), file=node_file)
-        print(file=node_file)
-        for line in body.splitlines():
-            print(line, file=node_file)
-
-# Run the content converters on the new content.
-assert len(sys.argv) == 2
-subprocess.call(["scripts/convert-content.sh", sys.argv[1]])
+    with open("%s/%s" % (content_dir, fn), "w") as content_file:
+        content_file.write(body)
+    bodynl = filter_nl(body)
+    formatted = formatters[ftype](body, sitename, title)
+    with open("%s/%s" % (node_dir, fn), "w") as node_file:
+        node_file.write(formatted)
