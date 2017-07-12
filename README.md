@@ -55,10 +55,10 @@ We will assume that the domain name of your sitename is
 
 ## Useful Links
 
-[Drupal 7 DB doc](http://www.drupal.org/node/1785994#d7),
-[Drupal 7 DB content storage](http://drupal.stackexchange.com/a/6791),
-[MySQLdb doc](http://mysqlclient.readthedocs.io),
-[ATOM RFC](http://tools.ietf.org/html/rfc4287).
+* [Drupal 7 DB doc](http://www.drupal.org/node/1785994#d7)
+* [Drupal 7 DB content storage](http://drupal.stackexchange.com/a/6791)
+* [MySQLdb doc](http://mysqlclient.readthedocs.io)
+* [ATOM RFC](http://tools.ietf.org/html/rfc4287)
 
 ## Status
 
