@@ -7,6 +7,8 @@
 # Pull the content out of a Drupal site into
 # portable formats.
 
+import re
+
 # Directory where raw content is to be stored.
 content_dir = "content"
 
@@ -29,7 +31,10 @@ sitename = sys.argv[1]
 
 # Connect to the database using the information specified
 # in the cnf file.
-db = MySQLdb.connect(read_default_file="~/.drupal_jailbreak.my.cnf")
+sitename_dashes = re.sub(r'\.', '-', sitename)
+cwd = os.getcwd()
+default_file = "%s/%s.my.cnf" % (cwd, sitename_dashes)
+db = MySQLdb.connect(read_default_file=default_file)
 c = db.cursor()
 
 # Get the possible filter formats, which correspond
