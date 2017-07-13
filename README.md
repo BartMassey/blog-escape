@@ -1,10 +1,12 @@
-# Drupal Jailbreak
+# Blog Escape
 Copyright &copy; 2017 Bart Massey
 
-Drupal Jailbreak is a database scraper for
+Blog Escape is a database scraper for
 [Drupal](http://drupal.org) sites. It digs the content out
 of a site by scraping the database and deposits it in
 well-formatted static files, ready for deployment elsewhere.
+It was intended for my blog, but will try to rescue as much
+of the Drupal site as possible.
 
 Drupal breaks all the time. I used it as my blog site for
 many years (Drupal 4 through Drupal 7), but eventually it
@@ -12,8 +14,8 @@ got to the point where it would neither run nor upgrade.
 This software is my solution for getting my old blog content
 back.
 
-Drupal Jailbreak is written in Python 3 and currently
-targeted at Drupal 7 Postgres content.
+Blog Escape is written in Python 3 and currently targeted at
+Drupal 7 Postgres content.
 
 This is a work in progress. Its current functionality is
 nonexistent, and its design is still in flux.
@@ -47,7 +49,7 @@ We will assume that the domain name of your sitename is
     password="example_password"
     ```
 
-1. Run `python3 drupal-jailbreak.py drupal.example.org`.
+1. Run `python3 blog-escape.py drupal.example.org`.
 
 1. Move the resulting `nodes` and `files` directory to the
    root of your new archive website. Adjust your webserver
