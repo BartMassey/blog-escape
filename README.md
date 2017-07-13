@@ -79,10 +79,14 @@ We will assume that the domain name of your sitename is
 * Rescue Markdown nodes.
 * Add appropriate HTML wrapper to nodes.
 * Prepend title and date to node content.
+* Dig blog post ordering out of database.
+  Create blog indexes and master blog index.
 * Deal with (B) and other smileys.
 * Rescue BBCode nodes (ugh).
 * Rescue image nodes.
 * Attach comment nodes to parents somehow.
+* Build proper Python installation stuff. Prepare for PIP3
+  upload.
 
 ## Limitations
 
