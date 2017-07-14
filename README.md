@@ -35,6 +35,15 @@ We will assume that the domain name of your sitename is
     necessary, but better safe than sorry. Use `mysql-dump`
     and then restore the database into its new home.
 
+    **Danger:** your old Drupal database and the new one are
+    probably both completely screwed up with respect to the
+    MySQL `utf8`, `utf8mb4` and `latin1` encodings. Dig
+    around in the excellent series of reference cards
+    starting
+    [here](https://makandracards.com/makandra/595-dumping-and-importing-from-to-mysql-in-an-utf-8-safe-way)
+    to figure out how to get a copy of the database with
+    Unicode preserved.
+
 1.  Find the `files` directory under your site directory in
     your Drupal installation. Copy it over and `cd` into it.
     Use `mv -f images/* . ; rmdir images` to get all the old
