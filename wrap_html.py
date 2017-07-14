@@ -21,7 +21,7 @@ head = """\
 """
 
 # HTML footer.
-foot = """
+foot = """\
 </body></html>
 """
 

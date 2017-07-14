@@ -9,11 +9,14 @@
 
 import re
 
+# Top directory for generated website.
+site_dir = "site"
+
 # Directory where raw content is to be stored.
 content_dir = "content"
 
 # Directory where processed content is to be stored.
-node_dir = "node"
+node_dir = "%s/node" % site_dir
 
 import sys
 import os
@@ -83,13 +86,14 @@ formatters = {
 }
 
 # Extract node contents and store in files.
-# Captions are represented in field_data_body with
-# body_format NULL somehow.
+# XXX Captions are represented in field_data_body with
+# body_format NULL when there is no caption body.
 c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
                     field_data_body.body_format
              FROM node JOIN field_data_body
              ON node.nid = field_data_body.entity_id
              WHERE field_data_body.body_format IS NOT NULL""")
+index = ""
 for nid, title, body, fformat in c:
     if fformat in formats:
         ftype = formats[fformat]
@@ -108,3 +112,11 @@ for nid, title, body, fformat in c:
     wrapped = wrap_html(formatted, title=title)
     with open("%s/%s" % (node_dir, nfn), "w") as node_file:
         node_file.write(wrapped)
+    index += '<li>[%s] <a href="/node/%s">%s</a></li>\n' % (nid, nfn, title)
+
+# Generate an index file for the site.
+title = "Archived Content: %s" % (sitename,)
+index = "<ul>\n" + index + "</ul>\n"
+index = wrap_html(index, title=title)
+with open("%s/index.html" % (site_dir), "w") as index_file:
+    index_file.write(index)
