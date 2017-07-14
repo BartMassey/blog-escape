@@ -48,7 +48,9 @@ We will assume that the domain name of your sitename is
     your Drupal installation. Copy it over and `cd` into it.
     Use `mv -f images/* . ; rmdir images` to get all the old
     nested images out. Hope that there are no name
-    collisions between images with different content.
+    collisions between images with different content. You
+    can also remove the `files` → `.` symbolic link if you
+    have one and would like.
 
 1.  Create `drupal-example-org.my.cnf` with the username,
     database name and password of the Drupal database.

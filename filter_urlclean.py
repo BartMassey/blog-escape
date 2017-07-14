@@ -28,5 +28,7 @@ def filter_urlclean(content, sitename):
     content = re_sub(target,r'\1="/files/', content)
     target = '(src|href)="/files/images/'
     content = re_sub(target,r'\1="/files/', content)
+    target = '(src|href)="/files/files/'
+    content = re_sub(target,r'\1="/files/', content)
     # All done.
     return content
