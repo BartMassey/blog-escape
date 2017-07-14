@@ -24,6 +24,7 @@ import MySQLdb.cursors
 
 from filter_nl import filter_nl
 from format_html import format_html
+from format_md import format_md
 
 # Get the sitename from the command line.
 assert len(sys.argv) == 2
@@ -72,7 +73,8 @@ clean_dir(node_dir)
 
 # Set up the formatters.
 formatters = {
-    "html" : format_html
+    "html" : format_html,
+    "md" : format_md
 }
 
 # Extract node contents and store in files.
@@ -86,15 +88,16 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
 for nid, title, body, fformat in c:
     if fformat in formats:
         ftype = formats[fformat]
-        if ftype != "html":
+        if ftype != "html" and ftype != "md":
             continue
-        fn = "%d.%s" % (nid, ftype)
+        cfn = "%d.%s" % (nid, ftype)
+        nfn = "%d.html" % (nid,)
     else:
         print("node %d: unknown format %s" % (nid, fformat))
         continue
     body = filter_nl(body)
-    with open("%s/%s" % (content_dir, fn), "w") as content_file:
+    with open("%s/%s" % (content_dir, cfn), "w") as content_file:
         content_file.write(body)
     formatted = formatters[ftype](body, sitename, title)
-    with open("%s/%s" % (node_dir, fn), "w") as node_file:
+    with open("%s/%s" % (node_dir, nfn), "w") as node_file:
         node_file.write(formatted)

@@ -27,6 +27,8 @@ We will assume that the domain name of your sitename is
 
 1.  This software requires the Python 3 `MySQLDB`
     module. Install it from your distro or with `pip3`.
+    It also requires the `mistune` Markdown parser.
+    Same deal.
 
 1.  You may want to create a fresh copy of the Drupal
     database, just to avoid accidents. This should not be
@@ -73,10 +75,10 @@ We will assume that the domain name of your sitename is
 * Filter internal reference URLs in some sane way.
 * Add missing par tags to HTML for auto-par formats.
   (This isn't quite right, currently.)
+* Rescue Markdown nodes.
 
 ### To Do
 
-* Rescue Markdown nodes.
 * Add appropriate HTML wrapper to nodes.
 * Prepend title and date to node content.
 * Dig blog post ordering out of database.
