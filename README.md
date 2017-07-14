@@ -76,6 +76,8 @@ We will assume that the domain name of your sitename is
 * Add missing par tags to HTML for auto-par formats.
   (This isn't quite right, currently.)
 * Rescue Markdown nodes.
+* Rescue BBCode nodes (ugh).
+* Rescue text nodes.
 
 ### To Do
 
@@ -84,7 +86,6 @@ We will assume that the domain name of your sitename is
 * Dig blog post ordering out of database.
   Create blog indexes and master blog index.
 * Deal with (B) and other smileys.
-* Rescue BBCode nodes (ugh).
 * Rescue image nodes.
 * Attach comment nodes to parents somehow.
 * Build proper Python installation stuff. Prepare for PIP3

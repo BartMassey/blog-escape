@@ -25,6 +25,8 @@ import MySQLdb.cursors
 from filter_nl import filter_nl
 from format_html import format_html
 from format_md import format_md
+from format_bbcode import format_bbcode
+from format_txt import format_txt
 
 # Get the sitename from the command line.
 assert len(sys.argv) == 2
@@ -74,7 +76,9 @@ clean_dir(node_dir)
 # Set up the formatters.
 formatters = {
     "html" : format_html,
-    "md" : format_md
+    "md" : format_md,
+    "bbcode" : format_bbcode,
+    "txt" : format_txt
 }
 
 # Extract node contents and store in files.
@@ -88,7 +92,8 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
 for nid, title, body, fformat in c:
     if fformat in formats:
         ftype = formats[fformat]
-        if ftype != "html" and ftype != "md":
+        if ftype not in formatters:
+            print("node %d: cannot format %s" % (nid, ftype))
             continue
         cfn = "%d.%s" % (nid, ftype)
         nfn = "%d.html" % (nid,)

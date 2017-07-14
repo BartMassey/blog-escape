@@ -8,7 +8,6 @@
 
 import mistune
 
-from filter_autop import filter_autop
 from filter_urlclean import filter_urlclean
 
 markdown = mistune.Markdown()
