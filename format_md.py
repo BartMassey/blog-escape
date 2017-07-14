@@ -14,6 +14,6 @@ markdown = mistune.Markdown()
 
 # Return a properly-formatted version of
 # the given Markdown content.
-def format_md(content, sitename, title):
+def format_md(content, sitename):
     content = markdown(content)
     return filter_urlclean(content, sitename)

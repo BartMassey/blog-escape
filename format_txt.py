@@ -8,5 +8,5 @@
 
 # Return a protected version of
 # the given text content.
-def format_txt(content, sitename, title):
+def format_txt(content, sitename):
     return "<pre>\n" + content + "\n</pre>\n"

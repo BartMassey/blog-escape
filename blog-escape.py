@@ -27,6 +27,7 @@ from format_html import format_html
 from format_md import format_md
 from format_bbcode import format_bbcode
 from format_txt import format_txt
+from wrap_html import wrap_html
 
 # Get the sitename from the command line.
 assert len(sys.argv) == 2
@@ -103,6 +104,7 @@ for nid, title, body, fformat in c:
     body = filter_nl(body)
     with open("%s/%s" % (content_dir, cfn), "w") as content_file:
         content_file.write(body)
-    formatted = formatters[ftype](body, sitename, title)
+    formatted = formatters[ftype](body, sitename)
+    wrapped = wrap_html(formatted, title=title)
     with open("%s/%s" % (node_dir, nfn), "w") as node_file:
-        node_file.write(formatted)
+        node_file.write(wrapped)

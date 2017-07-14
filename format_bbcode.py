@@ -14,6 +14,6 @@ parser = bbcode.Parser(replace_links=False, escape_html=False)
 
 # Return a properly-formatted version of
 # the given Markdown content.
-def format_bbcode(content, sitename, title):
+def format_bbcode(content, sitename):
     content = parser.format(content)
     return filter_urlclean(content, sitename)

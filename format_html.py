@@ -11,6 +11,6 @@ from filter_urlclean import filter_urlclean
 
 # Return a properly-formatted version of
 # the given HTML(ish) content.
-def format_html(content, sitename, title):
+def format_html(content, sitename):
     urlclean = filter_urlclean(content, sitename)
     return filter_autop(urlclean)
