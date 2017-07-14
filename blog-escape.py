@@ -26,10 +26,11 @@ import MySQLdb
 import MySQLdb.cursors
 
 from filter_nl import filter_nl
-from format_html import format_html
+from format_htm import format_htm
 from format_md import format_md
 from format_bbcode import format_bbcode
 from format_txt import format_txt
+from format_html import format_html
 from wrap_html import wrap_html
 
 # Get the sitename from the command line.
@@ -55,6 +56,7 @@ def get_formats(pattern):
 # Build the format -> suffix dictionary.
 format_types = [
     ("HTML", "html"), 
+    ("EASY HTML", "htm"),
     ("MARKDOWN", "md"),
     ("TEXT", "txt"),
     ("PHP", "php"),
@@ -79,6 +81,7 @@ clean_dir(node_dir)
 
 # Set up the formatters.
 formatters = {
+    "htm" : format_htm,
     "html" : format_html,
     "md" : format_md,
     "bbcode" : format_bbcode,
