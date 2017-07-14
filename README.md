@@ -66,30 +66,9 @@ We will assume that the domain name of your sitename is
 
 ## Status
 
-### Done
-
-* Extract title, body and type of blog nodes.
-* Store HTML blog nodes in files named by node id.
-* Give the nodes a filetype-based extension.
-* Get static pages out as well as blog nodes.
-* Filter internal reference URLs in some sane way.
-* Add missing par tags to HTML for auto-par formats.
-  (This isn't quite right, currently.)
-* Rescue Markdown nodes.
-* Rescue BBCode nodes (ugh).
-* Rescue text nodes.
-
-### To Do
-
-* Add appropriate HTML wrapper to nodes.
-* Prepend title and date to node content.
-* Dig blog post ordering out of database.
-  Create blog indexes and master blog index.
-* Deal with (B) and other smileys.
-* Rescue image nodes.
-* Attach comment nodes to parents somehow.
-* Build proper Python installation stuff. Prepare for PIP3
-  upload.
+See the GitHub
+[Development](https://github.com/BartMassey/blog-escape/projects/1)
+Project Board for pending and completed development tasks.
 
 ## Limitations
 
