@@ -12,7 +12,9 @@ Drupal breaks all the time. I used it as my blog site for
 many years (Drupal 4 through Drupal 7), but eventually it
 got to the point where it would neither run nor upgrade.
 This software is my solution for getting my old blog content
-back.
+back. (Except — LOL — my Drupal install mysteriously started
+working again the other day, with no obvious intervention on
+my part. I'm still going to finish this project, though.)
 
 Blog Escape is written in Python 3 and currently targeted at
 Drupal 7 Postgres content.
