@@ -29,7 +29,7 @@ def html_escape(text):
 #   http://api.drupal.org/api/function/_filter_autop
 # This is a deliberately literal translation, with as little
 # modification as possible to the original. Comments herein
-# are from the original source.
+# are from the original source, unless marked with BCM.
 def filter_autop(text):
     """Convert line breaks into <p> and <br> in an intelligent fashion."""
 
@@ -47,21 +47,27 @@ def filter_autop(text):
     ignore = False
     ignoretag = None
     output = ''
-    for i, chunk in zip(range(len(chunks)), chunks):
+    for i, chunk in zip(range(len(chunks) + 1), chunks):
         if i & 1 == 1:
             # Passthrough comments.
-            if chunk.startswith('<!--'):
-                output += chunk
+            if chunk[1:4] == '!--':
+                # BCM: This looks like a bug to me, but one
+                # that Drupal wouldn't see since the only normal
+                # comment is <!--break-->, which is apparently
+                # prefiltered by Drupal. In any case, this fix
+                # prevents doubling the comments.
+                # output += chunk
+                pass
             else:
                 # Opening or closing tag?
                 open = chunk[1] != '/'
                 tag = re_split('[ >]', chunk[2 - int(open):], maxsplit=2)[0]
-                if ignore:
+                if not ignore:
                     if open:
                         ignore = True
                         ignoretag = tag
                 # Only allow a matching tag to close it.
-                elif open and ignoretag == tag:
+                elif not open and ignoretag == tag:
                     ignore = False
                     ignoretag = None
         elif not ignore:
@@ -79,10 +85,10 @@ def filter_autop(text):
             chunk = '<p>' + re_sub(r'\n\s*\n\n?(.)', "</p>\n<p>\\1", chunk) \
                     + "</p>\n";
             # problem with nested lists
-            chunk = re_sub("<p>(<li.+?)</p>", "\\1", chunk);
-            chunk = re_sub('<p><blockquote([^>]*)>', "<blockquote\\1><p>",
+            chunk = re_sub(r"<p>(<li.+?)</p>", "\\1", chunk);
+            chunk = re_sub(r'<p><blockquote([^>]*)>', "<blockquote\\1><p>",
                         chunk, flags=re.I)
-            chunk = chunk.replace('</blockquote></p>', '</p></blockquote>')
+            chunk = chunk.replace(r'</blockquote></p>', '</p></blockquote>')
             # under certain strange conditions it could
             # create a P of entirely whitespace
             chunk = re_sub(r'<p>\s*</p>\n?', '', chunk)
@@ -90,9 +96,9 @@ def filter_autop(text):
             chunk = re_sub(r'(</?' + block + '[^>]*>)\s*</p>', "\\1", chunk)
             # make line breaks
             chunk = re_sub(r'(?<!<br />)\s*\n', "<br />\n", chunk) 
-            chunk = re_sub('(</?' + block + '[^>]*>)\s*<br />', "\\1", chunk)
-            chunk = re_sub('<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)',
+            chunk = re_sub(r'(</?' + block + '[^>]*>)\s*<br />', "\\1", chunk)
+            chunk = re_sub(r'<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)',
                            '\\1', chunk)
-            chunk = re_sub('&([^#])(?![A-Za-z0-9]{1,8};)', '&amp;\\1', chunk)
+            chunk = re_sub(r'&([^#])(?![A-Za-z0-9]{1,8};)', '&amp;\\1', chunk)
         output += chunk
     return output
