@@ -10,19 +10,6 @@ import re
 # functions to avoid recompiling on every run.
 from re_memo import *
 
-html_escape_table = {
-    "&": "&amp;",
-    ">": "&gt;",
-    "<": "&lt;",
-#   '"': "&quot;",
-#   "'": "&apos;",
-}
-
-# http://wiki.python.org/moin/EscapingHtml
-def html_escape(text):
-    """Produce entities within text."""
-    return "".join(html_escape_table.get(c,c) for c in text)
-
 # Originally based on: http://photomatt.net/scripts/autop
 #     
 # Ported directly from the Drupal _filter_autop() function:
