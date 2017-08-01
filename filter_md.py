@@ -4,12 +4,13 @@
 # Please see the file COPYING in this distribution
 # for license terms.
 
-# "Format" HTML content.
+# Format Markdown content.
 
-from filter_urlclean import filter_urlclean
+import mistune
+
+markdown = mistune.Markdown()
 
 # Return a properly-formatted version of
-# the given HTML-ish content which needs auto
-# line breaks.
-def format_html(content, sitename):
-    return filter_urlclean(content, sitename)
+# the given Markdown content.
+def filter_md(content, sitename, args):
+    return markdown(content)

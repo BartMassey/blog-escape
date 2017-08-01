@@ -7,6 +7,7 @@
 # Pull the content out of a Drupal site into
 # portable formats.
 
+import sys
 import re
 
 # Top directory for generated website.
@@ -26,11 +27,12 @@ import MySQLdb
 import MySQLdb.cursors
 
 from filter_nl import filter_nl
-from format_htm import format_htm
-from format_md import format_md
-from format_bbcode import format_bbcode
-from format_txt import format_txt
-from format_html import format_html
+from filter_autop import filter_autop
+from filter_urlclean import filter_urlclean
+from filter_md import filter_md
+from filter_bbcode import filter_bbcode
+from filter_txt import filter_txt
+from filter_xss import filter_xss
 from wrap_html import wrap_html
 
 # Get the sitename from the command line.
@@ -45,18 +47,46 @@ default_file = "%s/%s.my.cnf" % (cwd, sitename_dashes)
 db = MySQLdb.connect(read_default_file=default_file)
 c = db.cursor()
 
-# Get the possible filter formats, which correspond
-# to content body formats, matching a given pattern.
-def get_formats(pattern):
-    c = db.cursor()
-    c.execute("""SELECT format FROM filter_format
-                 WHERE upper(name) LIKE %s""", ("%" + pattern + "%",))
-    return [fformat for fformat, in c]
+# Filters supported by this software.
+supported_filters = {
+    "filter.filter_html": filter_html,
+    "filter.filter_html_escape": filter_html_escape,
+    "markdown.filter_markdown": filter_markdown,
+    "filter.filter_autop": filter_autop,
+    "filter.filter_url": filter_url
+}
+
+# Filter chains to run for filtering.
+filters = dict()
+
+def register_filters():
+    """Register the filter processing list for each filter
+       format.
+    """
+    global supported_filters, filters
+    cf = db.cursor()
+    cf.execute("""SELECT format FROM filter_format""")
+    for fformat, in cf:
+        format_filters = []
+        c = db.cursor()
+        c.execute("""SELECT module, name, settings FROM filter
+                     WHERE format = %s AND status = 1
+                     ORDER BY weight DESC""", (fformat,))
+        filter_suffix = None
+        for fm, fn, fs in c:
+            fi = fm + "." fn
+            if fi in supported_filters:
+                if supported_filters[fi]:
+                    format_filters.append((supported_filters[fi], settings))
+            else:
+                print("warning: unknown filter %s ignored" % (fi,),
+                      file=sys.stderr)
+                supported_filters[fi] = None
 
 # Build the format -> suffix dictionary.
-format_types = [
-    ("HTML", "html"), 
+suffixes = [
     ("EASY HTML", "htm"),
+    ("HTML", "html"), 
     ("MARKDOWN", "md"),
     ("TEXT", "txt"),
     ("PHP", "php"),

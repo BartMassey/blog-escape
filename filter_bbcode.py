@@ -4,16 +4,13 @@
 # Please see the file COPYING in this distribution
 # for license terms.
 
-# Format Markdown content.
+# Format BBCode content.
 
-import mistune
+import bbcode
 
-from filter_urlclean import filter_urlclean
-
-markdown = mistune.Markdown()
+parser = bbcode.Parser(replace_links=False, escape_html=False)
 
 # Return a properly-formatted version of
 # the given Markdown content.
-def format_md(content, sitename):
-    content = markdown(content)
-    return filter_urlclean(content, sitename)
+def filter_bbcode(content, sitename, args):
+    return parser.format(content)
