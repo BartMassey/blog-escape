@@ -29,3 +29,11 @@ def re_split(expr, *args, maxsplit=0, flags=0):
 # Memoized sub.
 def re_sub(expr, *args, count=0, flags=0):
     return memoize_re(expr, flags=flags).sub(*args, count=count)
+
+# Memoized match.
+def re_match(expr, *args, flags=0):
+    return memoize_re(expr, flags=flags).match(*args)
+
+# Memoized search.
+def re_search(expr, *args, flags=0):
+    return memoize_re(expr, flags=flags).match(*args)

@@ -2,30 +2,65 @@
 
 # Port of Drupal's `filter_url()` from `filter.module` to Python.
 
-from re_memo import *
-
 # This is a deliberately literal translation, with as little
 # modification as possible to the original. Comments herein
 # are from the original source, unless marked with BCM.
 
-def filter_url(text, sitename, settings):
-"""Convert text into hyperlinks automatically.
+import html
 
-   This filter identifies and makes clickable three types of "links".
-   - URLs like http://example.com.
-   - E-mail addresses like name@example.com.
-   - Web addresses without the "http://" protocol defined,
-     like www.example.com.
-   Each type must be processed separately, as there is no one regular
-   expression that could possibly match all of the cases in one pass.
-"""
+from re_memo import *
+
+def _filter_url_parse_full_links(match):
+    """Makes links out of absolute URLs.  Callback for sub()
+       within filter_url().  The first parenthesis in the
+       regexp contains the URL, the second trailing
+       punctuation. BCM: We do not choose to shorten
+       captions for long URLs, because bleah.
+    """
+    url = html.unescape(match.group(1))
+    url = html.escape(url)
+    punctuation = match.group(2)
+    return '<a href="' + url + '">' + url + '</a>' + punctuation
+
+def _filter_url_parse_email_links(match):
+    """Makes links out of e-mail addresses.  Callback for sub()
+       within filter_url(). BCM: We do not choose to shorten
+       captions for long e-mail addresses, because bleah.
+    """
+    email = html.unescape(match.group(0))
+    email = html.escape(email)
+    return '<a href="mailto:' + email + '">' + email + '</a>'
+
+def _filter_url_parse_partial_links(match):
+    """Makes links out of domain names starting with 'www.'.
+       Callback for sub() within filter_url().  The first
+       parenthesis in the regexp contains the URL, the
+       second trailing punctuation. BCM: We do not choose to
+       shorten captions for long links, because bleah.
+
+    """
+    dname = html.unescape(match.group(1))
+    dname = html.escape(dname)
+    punctuation = match.group(2)
+    return '<a href="http://' + dname + '">' + dname + '</a>' + punctuation
+
+def filter_url(text, sitename, settings):
+    """Convert text into hyperlinks automatically.
+
+       This filter identifies and makes clickable three types of "links".
+       - URLs like http://example.com.
+       - E-mail addresses like name@example.com.
+       - Web addresses without the "http://" protocol defined,
+         like www.example.com.
+       Each type must be processed separately, as there is no one regular
+       expression that could possibly match all of the cases in one pass.
+    """
     # Tags to skip and not recurse into.
     ignore_tags = 'a|script|style|code|pre'
 
     # Pass length to regexp callback.
     # BCM: We will ignore the length limit as rather silly
     # and some work to implement.
-    #_filter_url_trim(NULL, $filter->settings['filter_url_length']);
 
     # Create an array which contains the regexps for each
     # type of link.  The key to the regexp is the name of a
@@ -64,83 +99,88 @@ def filter_url(text, sitename, settings):
     # characters are optionally excluded.
     punctuation = r'[\.,?!]*?'
 
+    tasks = []
+
     # Match absolute URLs.
     url_pattern = r"(?:%s)?(?:%s|%s)/?(?:%s)?" % (auth, domain, ip, trail)
     pattern = r"((?:%s)(?:%s))(%s)" % (protocols, url_pattern, punctuation)
-    tasks['_filter_url_parse_full_links'] = pattern
+    tasks.append((_filter_url_parse_full_links, pattern))
 
     # Match e-mail addresses.
     url_pattern = r"[A-Za-z0-9._+-]{1,254}@(?:%s)" % (domain,)
     pattern = r"(%s)" % (url_pattern,)
-    tasks['_filter_url_parse_email_links'] = pattern
+    tasks.append((_filter_url_parse_email_links, pattern))
 
     # Match www domains.
     url_pattern = r"www\.(?:%s)/?(?:%s)?" % (domain, trail)
     pattern = r"(%s)(%s)" % (url_pattern, punctuation)
-    tasks['_filter_url_parse_partial_links'] = pattern
+    tasks.append((_filter_url_parse_partial_links, pattern))
+
+    # HTML comments need to be handled separately, as
+    # they may contain HTML markup, especially a
+    # '>'. Therefore, remove all comment contents and
+    # add them back later.
+    # BCM: Replaced the mess in the original PHP with a
+    # cleaner split() implementation. Also moved out of loop
+    # (what was with that?).
+    split_comments = re_split(r'(<!--.*?-->)', text, flags=re.S)
+    saved_comments = [split_comments[i]
+                      for i in range(1, len(split_comments), 2)]
+    text = '<!---->'.join([split_comments[i]
+                           for i in range(0, len(split_comments), 2)])
 
     # Each type of URL needs to be processed separately. The
     # text is joined and re-split after each task, since all
     # injected HTML tags must be correctly protected before
     # the next task.
-    for task, pattern in tasks.items():
-        # HTML comments need to be handled separately, as
-        # they may contain HTML markup, especially a
-        # '>'. Therefore, remove all comment contents and
-        # add them back later.
-        # BCM: Replaced the mess in the original PHP with a
-        # cleaner split() implementation.
-        split_comments = re_split(r'(<!--(?:.*?)-->)?', flags=re.S)
-        saved_comments = [split_comments[i]
-                          for i in range(0, len(split_comments) + 1, 2)]
-        text = '<!---->'.join([split_comments[i]
-                               for i in range(1, len(split_comments) + 1, 2)])
+    for task, pattern in tasks:
 
         # Split at all tags; ensures that no tags or attributes are processed.
-        $chunks = preg_split('/(<.+?>)/is', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
-        # PHP ensures that the array consists of alternating delimiters and
-        # literals, and begins and ends with a literal (inserting NULL as
-        # required). Therefore, the first chunk is always text:
-        $chunk_type = 'text';
-        # If a tag of $ignore_tags is found, it is stored in $open_tag and only
-        # removed when the closing tag is found. Until the closing tag is found,
-        # no replacements are made.
-        $open_tag = '';
+        chunks = re_split(r'(<.+?>)', text, flags=re.I|re.S)
+        # The array consists of alternating delimiters and
+        # literals, and begins and ends with a literal
+        # (inserting NULL as required). Therefore, the first
+        # chunk is always text:
+        chunk_type = 'text'
+        # If a tag of ignore_tags is found, it is stored in
+        # open_tag and only removed when the closing tag is
+        # found. Until the closing tag is found, no
+        # replacements are made.
+        open_tag = None
 
-        for ($i = 0; $i < count($chunks); $i++) {
-          if ($chunk_type == 'text') {
-            # Only process this text if there are no unclosed $ignore_tags.
-            if ($open_tag == '') {
-              # If there is a match, inject a link into this chunk via the callback
-              # function contained in $task.
-              $chunks[$i] = preg_replace_callback($pattern, $task, $chunks[$i]);
-            }
-            # Text chunk is done, so next chunk must be a tag.
-            $chunk_type = 'tag';
-          }
-          else {
-            # Only process this tag if there are no unclosed $ignore_tags.
-            if ($open_tag == '') {
-              # Check whether this tag is contained in $ignore_tags.
-              if (preg_match("`<($ignore_tags)(?:\s|>)`i", $chunks[$i], $matches)) {
-                $open_tag = $matches[1];
-              }
-            }
-            # Otherwise, check whether this is the closing tag for $open_tag.
-            else {
-              if (preg_match("`<\/$open_tag>`i", $chunks[$i], $matches)) {
-                $open_tag = '';
-              }
-            }
-            # Tag chunk is done, so next chunk must be text.
-            $chunk_type = 'text';
-          }
-        }
+        for i in range(len(chunks)):
+            if chunk_type == 'text':
+                # Only process this text if there are no
+                # unclosed ignore_tags.
+                if not open_tag:
+                    # If there is a match, inject a link
+                    # into this chunk via the callback
+                    # function contained in task.
+                    chunks[i] = re_sub(pattern, task, chunks[i])
+                # Text chunk is done, so next chunk must be a tag.
+                chunk_type = 'tag'
+            else:
+                # Only process this tag if there are no unclosed ignore_tags.
+                if not open_tag:
+                    # Check whether this tag is contained in ignore_tags.
+                    matches = re_match(r"<(%s)(?:\s|>)" % (ignore_tags,),
+                                       chunks[i], flags=re.I)
+                    if matches:
+                        open_tag = matches.group(1)
+                # Otherwise, check whether this is the
+                # closing tag for open_tag.
+                elif re_match(r"<\/%s>" % (open_tag,),
+                              chunks[i], flags = re.I):
+                    open_tag = None
+                # Tag chunk is done, so next chunk must be text.
+                chunk_type = 'text'
+        text = ''.join(chunks)
 
-        $text = implode($chunks);
-        # Revert back to the original comment contents
-        _filter_url_escape_comments('', FALSE);
-        $text = preg_replace_callback('`<!--(.*?)-->`', '_filter_url_escape_comments', $text);
-      }
+    # Revert back to the original comment contents
+    split_text = re_split(r'(<!---->)', text, flags=re.S)
+    for i in range(1, len(split_text), 2):
+        assert split_text[i] == "<!---->"
+        split_text[i] = saved_comments[i // 2]
+    text = ''.join(split_text)
 
-    return $text;
+    return text
