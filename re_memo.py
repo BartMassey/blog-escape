@@ -30,6 +30,10 @@ def re_split(expr, *args, maxsplit=0, flags=0):
 def re_sub(expr, *args, count=0, flags=0):
     return memoize_re(expr, flags=flags).sub(*args, count=count)
 
+# Memoized subn.
+def re_subn(expr, *args, count=0, flags=0):
+    return memoize_re(expr, flags=flags).subn(*args, count=count)
+
 # Memoized match.
 def re_match(expr, *args, flags=0):
     return memoize_re(expr, flags=flags).match(*args)
