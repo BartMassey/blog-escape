@@ -8,8 +8,10 @@
 
 from re_memo import *
 
-# This is a fairly literal port of the corresponding Drupal
-# functionality.
+# This is a literal-minded port of the corresponding Drupal
+# functionality. Some security-important stuff has been
+# left out because hard to implement and not obviously OK,
+# handled elsewhere in this implementation, etc.
 
 # Tags that are deemed generally safe for use. Why is "a" there?
 # I don't know.
@@ -43,7 +45,7 @@ def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
     # Process a string of HTML attributes, returning a
     # cleaned-up version.
     def filter_xss_attributes(attr):
-        attrarr = list
+        attrarr = list()
         mode = 0
         attrname = ''
 
@@ -95,7 +97,7 @@ def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
                             attrarr.append(asgn_pat % (attrname, thisval))
                             working = True
                         mode = 0
-                        attr = preg_replace(attr_pat, '', attr)
+                        attr = re_sub(attr_pat, '', attr)
                         break
 
             if not working:
@@ -120,19 +122,19 @@ def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
 
     # Return cleaned-up version of XHTML element.
     def filter_xss_split(match):
-        tag = match.group(0)
-        if tag[0] != '<':
+        string = match.group(0)
+        if string[0] != '<':
             # We matched a lone ">" character.
-            assert tag == '>'
+            assert string == '>'
             return '&gt;'
-        elif len(tag) == 1:
+        elif len(string) == 1:
             # We matched a lone "<" character.
-            assert tag == '<'
+            assert string == '<'
             return '&lt;'
 
         matches = \
           re_match(r'^<\s*(/\s*)?([a-zA-Z0-9\-]+)([^>]*)>?|(<!--.*?-->)$',
-                   tag)
+                   string)
         if not matches:
             # Seriously malformed.
             return ''
@@ -160,7 +162,7 @@ def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
         if comment:
             return comment
 
-        if slash != '':
+        if slash:
             return "</%s>" % (elem,)
 
         # Is there a closing XHTML slash at the end of the attributes?
