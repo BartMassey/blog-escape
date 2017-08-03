@@ -44,6 +44,32 @@ def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
     # Named entities.
     string = re_sub(r'&amp;([A-Za-z][A-Za-z0-9]*;)', r'&\1', string)
     
+    atset = set(allowed_tags)
+
+    def filter_xss_split(tag):
+        if tag[0] != '<':
+            # We matched a lone ">" character.
+            assert tag == '>'
+            return '&gt;'
+        elif len(tag) == 1:
+            # We matched a lone "<" character.
+            assert tag == '<'
+            return '&lt;'
+
+
+        matches = \
+          re_match(r'^<\s*(/\s*)?([a-zA-Z0-9\-]+)([^>]*)>?|(<!--.*?-->)$',
+                   tag)
+        if not matches:
+            # Seriously malformed.
+            return ''
+
+        slash = matches.group(1).strip()
+        elem = matches.group(2)
+        attrlist = matches.group(3)
+        comment = matches.group(4)
+
+        
     return re_sub(r"""
     (
     <(?=[^a-zA-Z!/])  # a lone <
