@@ -10,41 +10,14 @@ import html
 
 from re_memo import *
 
-def _filter_url_parse_full_links(match):
-    """Makes links out of absolute URLs.  Callback for sub()
-       within filter_url().  The first parenthesis in the
-       regexp contains the URL, the second trailing
-       punctuation. BCM: We do not choose to shorten
-       captions for long URLs, because bleah.
-    """
-    url = html.unescape(match.group(1))
-    url = html.escape(url)
-    punctuation = match.group(2)
-    return '<a href="' + url + '">' + url + '</a>' + punctuation
+# Shortens long URLs to http://www.example.com/long/url...
+def filter_url_trim(text, length=None):
+  # Use +3 for '...' string length.
+  if length and len(text) > length + 3:
+      text = text[0: length] + '...'
+  return text
 
-def _filter_url_parse_email_links(match):
-    """Makes links out of e-mail addresses.  Callback for sub()
-       within filter_url(). BCM: We do not choose to shorten
-       captions for long e-mail addresses, because bleah.
-    """
-    email = html.unescape(match.group(0))
-    email = html.escape(email)
-    return '<a href="mailto:' + email + '">' + email + '</a>'
-
-def _filter_url_parse_partial_links(match):
-    """Makes links out of domain names starting with 'www.'.
-       Callback for sub() within filter_url().  The first
-       parenthesis in the regexp contains the URL, the
-       second trailing punctuation. BCM: We do not choose to
-       shorten captions for long links, because bleah.
-
-    """
-    dname = html.unescape(match.group(1))
-    dname = html.escape(dname)
-    punctuation = match.group(2)
-    return '<a href="http://' + dname + '">' + dname + '</a>' + punctuation
-
-def filter_url(text, sitename, settings):
+def filter_url(text, filter_url_length=200):
     """Convert text into hyperlinks automatically.
 
        This filter identifies and makes clickable three types of "links".
@@ -55,6 +28,41 @@ def filter_url(text, sitename, settings):
        Each type must be processed separately, as there is no one regular
        expression that could possibly match all of the cases in one pass.
     """
+
+
+    def filter_url_parse_full_links(match):
+        """Makes links out of absolute URLs.  Callback for sub()
+           within filter_url().  The first parenthesis in the
+           regexp contains the URL, the second trailing
+           punctuation.
+        """
+        url = html.unescape(match.group(1))
+        url = html.escape(url)
+        punctuation = match.group(2)
+        caption = filter_url_trim(url, filter_url_length)
+        return '<a href="' + url + '">' + caption  + '</a>' + punctuation
+
+    def filter_url_parse_email_links(match):
+        """Makes links out of e-mail addresses.  Callback for sub()
+           within filter_url().
+        """
+        email = html.unescape(match.group(0))
+        email = html.escape(email)
+        caption = filter_url_trim(email, filter_url_length)
+        return '<a href="mailto:' + email + '">' + caption + '</a>'
+
+    def filter_url_parse_partial_links(match):
+        """Makes links out of domain names starting with 'www.'.
+           Callback for sub() within filter_url().  The first
+           parenthesis in the regexp contains the URL, the
+           second trailing punctuation.
+        """
+        dname = html.unescape(match.group(1))
+        dname = html.escape(dname)
+        punctuation = match.group(2)
+        caption = filter_url_trim(dname, filter_url_length)
+        return '<a href="http://' + dname + '">' + caption + '</a>' + punctuation
+
     # Tags to skip and not recurse into.
     ignore_tags = 'a|script|style|code|pre'
 
@@ -104,17 +112,17 @@ def filter_url(text, sitename, settings):
     # Match absolute URLs.
     url_pattern = r"(?:%s)?(?:%s|%s)/?(?:%s)?" % (auth, domain, ip, trail)
     pattern = r"((?:%s)(?:%s))(%s)" % (protocols, url_pattern, punctuation)
-    tasks.append((_filter_url_parse_full_links, pattern))
+    tasks.append((filter_url_parse_full_links, pattern))
 
     # Match e-mail addresses.
     url_pattern = r"[A-Za-z0-9._+-]{1,254}@(?:%s)" % (domain,)
     pattern = r"(%s)" % (url_pattern,)
-    tasks.append((_filter_url_parse_email_links, pattern))
+    tasks.append((filter_url_parse_email_links, pattern))
 
     # Match www domains.
     url_pattern = r"www\.(?:%s)/?(?:%s)?" % (domain, trail)
     pattern = r"(%s)(%s)" % (url_pattern, punctuation)
-    tasks.append((_filter_url_parse_partial_links, pattern))
+    tasks.append((filter_url_parse_partial_links, pattern))
 
     # HTML comments need to be handled separately, as
     # they may contain HTML markup, especially a

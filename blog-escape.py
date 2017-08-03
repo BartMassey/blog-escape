@@ -7,9 +7,6 @@
 # Pull the content out of a Drupal site into
 # portable formats.
 
-import sys
-import re
-
 # Top directory for generated website.
 site_dir = "site"
 
@@ -20,19 +17,21 @@ content_dir = "content"
 node_dir = "%s/node" % site_dir
 
 import sys
+import re
 import os
 import os.path as osp
 
+import phpserialize
 import MySQLdb
 import MySQLdb.cursors
 
 from filter_nl import filter_nl
 from filter_autop import filter_autop
 from filter_urlclean import filter_urlclean
+from filter_url import filter_url
 from filter_md import filter_md
-from filter_bbcode import filter_bbcode
 from filter_txt import filter_txt
-from filter_xss import filter_xss
+from filter_html import filter_html, filter_html_escape
 from wrap_html import wrap_html
 
 # Get the sitename from the command line.
@@ -49,11 +48,11 @@ c = db.cursor()
 
 # Filters supported by this software.
 supported_filters = {
-    "filter.filter_html": filter_html,
-    "filter.filter_html_escape": filter_html_escape,
-    "markdown.filter_markdown": filter_markdown,
-    "filter.filter_autop": filter_autop,
-    "filter.filter_url": filter_url
+    "filter.filter_html": (filter_html, "html"),
+    "filter.filter_html_escape": (filter_html_escape, "txt"),
+    "markdown.filter_markdown": (filter_md, "md"),
+    "filter.filter_autop": (filter_autop, "autop."),
+    "filter.filter_url": (filter_url, None)
 }
 
 # Filter chains to run for filtering.
@@ -74,28 +73,21 @@ def register_filters():
                      ORDER BY weight DESC""", (fformat,))
         filter_suffix = None
         for fm, fn, fs in c:
-            fi = fm + "." fn
+            fi = fm + "." + fn
             if fi in supported_filters:
                 if supported_filters[fi]:
+                    settings = phpserialize.loads(fs)
                     format_filters.append((supported_filters[fi], settings))
             else:
                 print("warning: unknown filter %s ignored" % (fi,),
                       file=sys.stderr)
                 supported_filters[fi] = None
+        filters[fformat] = format_filters
 
-# Build the format -> suffix dictionary.
-suffixes = [
-    ("EASY HTML", "htm"),
-    ("HTML", "html"), 
-    ("MARKDOWN", "md"),
-    ("TEXT", "txt"),
-    ("PHP", "php"),
-    ("BBCODE", "bbcode")
-]
-formats = dict()
-for pattern, suffix in format_types:
-    for fformat in get_formats(pattern):
-        formats[fformat] = suffix
+# Register filters.
+register_filters()
+print(filters)
+exit(1)
 
 # Empty or create the given directory.
 def clean_dir(dir):
@@ -108,15 +100,6 @@ def clean_dir(dir):
 # Clean the work directories.
 clean_dir(content_dir)
 clean_dir(node_dir)
-
-# Set up the formatters.
-formatters = {
-    "htm" : format_htm,
-    "html" : format_html,
-    "md" : format_md,
-    "bbcode" : format_bbcode,
-    "txt" : format_txt
-}
 
 # Extract node contents and store in files.
 # XXX Captions are represented in field_data_body with

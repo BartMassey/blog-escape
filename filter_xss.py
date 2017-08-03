@@ -20,7 +20,7 @@ default_allowed_tags = [
     'ul', 'ol', 'li', 'dl', 'dt', 'dd'
 ]
                          
-def filter_xss(string, sitename, allowed_tags=default_allowed_tags):
+def filter_xss(string, allowed_tags=default_allowed_tags):
     """Return the given HTML-ish content with
        dangerous "XSS" content stripped and
        tags normalized.

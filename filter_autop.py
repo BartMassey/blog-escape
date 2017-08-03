@@ -17,7 +17,7 @@ from re_memo import *
 # This is a deliberately literal translation, with as little
 # modification as possible to the original. Comments herein
 # are from the original source, unless marked with BCM.
-def filter_autop(text, site, args):
+def filter_autop(text, **settings):
     """Convert line breaks into <p> and <br> in an intelligent fashion."""
 
     # All block level tags

@@ -12,5 +12,5 @@ markdown = mistune.Markdown()
 
 # Return a properly-formatted version of
 # the given Markdown content.
-def filter_md(content, sitename, args):
+def filter_md(content, **settings):
     return markdown(content)
