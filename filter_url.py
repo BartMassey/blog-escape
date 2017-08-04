@@ -17,7 +17,7 @@ def filter_url_trim(text, length=None):
       text = text[0: length] + '...'
   return text
 
-def filter_url(text, filter_url_length=200):
+def filter_url(text, filter_url_length="200"):
     """Convert text into hyperlinks automatically.
 
        This filter identifies and makes clickable three types of "links".
@@ -28,7 +28,7 @@ def filter_url(text, filter_url_length=200):
        Each type must be processed separately, as there is no one regular
        expression that could possibly match all of the cases in one pass.
     """
-
+    filter_url_length = int(filter_url_length)
 
     def filter_url_parse_full_links(match):
         """Makes links out of absolute URLs.  Callback for sub()

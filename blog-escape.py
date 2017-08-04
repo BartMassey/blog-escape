@@ -48,11 +48,12 @@ c = db.cursor()
 
 # Filters supported by this software.
 supported_filters = {
-    "filter.filter_html": (filter_html, "html"),
+    "filter.filter_html": (filter_html, None),
     "filter.filter_html_escape": (filter_html_escape, "txt"),
     "markdown.filter_markdown": (filter_md, "md"),
     "filter.filter_autop": (filter_autop, "autop."),
-    "filter.filter_url": (filter_url, None)
+    "filter.filter_url": (filter_url, None),
+    "php.php_code": (filter_txt, "php")
 }
 
 # Filter chains to run for filtering.
@@ -61,11 +62,14 @@ filters = dict()
 # Filename extension to use for raw filter input.
 suffixes = dict()
 
+# Filter names
+fnames = dict()
+
 def register_filters():
     """Register the filter processing list for each filter
        format.
     """
-    global supported_filters, filters
+    global supported_filters, filters, suffixes, fnames
     cf = db.cursor()
     cf.execute("""SELECT format, name FROM filter_format""")
     for fformat, ffname in cf:
@@ -80,7 +84,7 @@ def register_filters():
             if fi in supported_filters:
                 if supported_filters[fi]:
                     function, suffix = supported_filters[fi]
-                    settings = phpserialize.loads(fs)
+                    settings = phpserialize.loads(fs, decode_strings=True)
                     format_filters.append((function, settings))
                     if not suffix:
                         continue
@@ -98,28 +102,35 @@ def register_filters():
                                 format_suffix = ("." + suffix).join(parts)
                     else:
                         if not format_suffix:
-                            format_suffix = ""
+                            format_suffix = suffix
                         elif format_suffix[-1] != '.':
                             print("warning: extra filter %s ignored" % \
                                   (suffix,), file=sys.stderr)
-                            continue
-                        format_suffix += suffix
+                        else:
+                            format_suffix += suffix
             else:
                 print("warning: unknown filter %s ignored" % (fi,),
                       file=sys.stderr)
                 supported_filters[fi] = None
         filters[fformat] = format_filters
         if not format_suffix:
-            print("warning: unknown suffix for %s, using .xxx" % (ffname,),
-                  file=sys.stderr)
-            format_suffix = "xxx"
+            format_suffix = "html"
+        elif format_suffix[-1] == '.':
+            format_suffix += "html"
         suffixes[fformat] = format_suffix
+        fnames[fformat] = ffname
 
 # Register filters.
 register_filters()
-print(filters)
-print(suffixes)
-exit(1)
+
+def run_filter_chain(content, fformat):
+    """Run all the filters for the format in order with
+       appropriate arguments.
+    """
+    assert fformat in filters
+    for function, settings in filters[fformat]:
+        content = function(content, **settings)
+    return content
 
 # Empty or create the given directory.
 def clean_dir(dir):
@@ -143,21 +154,16 @@ c.execute("""SELECT node.nid, node.title, field_data_body.body_value,
              WHERE field_data_body.body_format IS NOT NULL""")
 index = ""
 for nid, title, body, fformat in c:
-    if fformat in formats:
-        ftype = formats[fformat]
-        if ftype not in formatters:
-            print("node %d: cannot format %s" % (nid, ftype))
-            continue
-        cfn = "%d.%s" % (nid, ftype)
-        nfn = "%d.html" % (nid,)
-    else:
-        print("node %d: unknown format %s" % (nid, fformat))
-        continue
+    assert fformat in filters
+    assert fformat in suffixes
+    cfn = "%d.%s" % (nid, suffixes[fformat])
+    nfn = "%d.html" % (nid,)
     body = filter_nl(body)
     with open("%s/%s" % (content_dir, cfn), "w") as content_file:
         content_file.write(body)
-    formatted = formatters[ftype](body, sitename)
-    wrapped = wrap_html(formatted, title=title)
+    body = run_filter_chain(body, fformat)
+    body = filter_urlclean(body, sitename)
+    wrapped = wrap_html(body, title=title)
     with open("%s/%s" % (node_dir, nfn), "w") as node_file:
         node_file.write(wrapped)
     index += '<li>[%s] <a href="/node/%s">%s</a></li>\n' % (nid, nfn, title)
