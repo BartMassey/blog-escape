@@ -58,35 +58,67 @@ supported_filters = {
 # Filter chains to run for filtering.
 filters = dict()
 
+# Filename extension to use for raw filter input.
+suffixes = dict()
+
 def register_filters():
     """Register the filter processing list for each filter
        format.
     """
     global supported_filters, filters
     cf = db.cursor()
-    cf.execute("""SELECT format FROM filter_format""")
-    for fformat, in cf:
+    cf.execute("""SELECT format, name FROM filter_format""")
+    for fformat, ffname in cf:
         format_filters = []
+        format_suffix = None
         c = db.cursor()
         c.execute("""SELECT module, name, settings FROM filter
                      WHERE format = %s AND status = 1
                      ORDER BY weight DESC""", (fformat,))
-        filter_suffix = None
         for fm, fn, fs in c:
             fi = fm + "." + fn
             if fi in supported_filters:
                 if supported_filters[fi]:
+                    function, suffix = supported_filters[fi]
                     settings = phpserialize.loads(fs)
-                    format_filters.append((supported_filters[fi], settings))
+                    format_filters.append((function, settings))
+                    if not suffix:
+                        continue
+                    if suffix[-1] == '.':
+                        if not format_suffix:
+                            format_suffix = suffix
+                        elif format_suffix[-1] == '.':
+                            format_suffix += suffix
+                        else:
+                            parts = format_suffix.rsplit('.', 1)
+                            if len(parts) == 1:
+                                format_suffix = suffix + format_suffix
+                            else:
+                                assert len(parts) == 2
+                                format_suffix = ("." + suffix).join(parts)
+                    else:
+                        if not format_suffix:
+                            format_suffix = ""
+                        elif format_suffix[-1] != '.':
+                            print("warning: extra filter %s ignored" % \
+                                  (suffix,), file=sys.stderr)
+                            continue
+                        format_suffix += suffix
             else:
                 print("warning: unknown filter %s ignored" % (fi,),
                       file=sys.stderr)
                 supported_filters[fi] = None
         filters[fformat] = format_filters
+        if not format_suffix:
+            print("warning: unknown suffix for %s, using .xxx" % (ffname,),
+                  file=sys.stderr)
+            format_suffix = "xxx"
+        suffixes[fformat] = format_suffix
 
 # Register filters.
 register_filters()
 print(filters)
+print(suffixes)
 exit(1)
 
 # Empty or create the given directory.
