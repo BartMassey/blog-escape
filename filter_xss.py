@@ -20,6 +20,9 @@ default_allowed_tags = [
     'ul', 'ol', 'li', 'dl', 'dt', 'dd'
 ]
                          
+log = open("/tmp/blog-escape.log", "w")
+assert log
+
 def filter_xss(string, allowed_tags=default_allowed_tags):
     """Return the given HTML-ish content with
        dangerous "XSS" content stripped and
@@ -45,9 +48,10 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
     # Process a string of HTML attributes, returning a
     # cleaned-up version.
     def filter_xss_attributes(attr):
+        print("---%s" % (attr,), file=log, flush=True)
         attrarr = list()
         mode = 0
-        attrname = ''
+        attrname = None
 
         while len(attr) != 0:
             # Was the last operation successful?
@@ -83,9 +87,11 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
                 # control pretty substantially here because
                 # Python has no assignment in conditionals
                 # and to remove duplicate code.
-                for q, qpat in [('"', '"'),
-                                ("'", "'"),
-                                ("", r"\s\"'")]:
+                for q in ['"', "'", ""]:
+                    if q == "":
+                        qpat = r"\s\"'"
+                    else:
+                        qpat = q
                     attr_pat = r'^%s([^%s]*)%s(\s+|$)' % (q, qpat, q)
                     match = re_match(attr_pat, attr)
                     if match:
@@ -95,7 +101,7 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
                                 q = '"'
                             asgn_pat = r"%%s=%s%%s%s" % (q, q)
                             attrarr.append(asgn_pat % (attrname, thisval))
-                            working = True
+                        working = True
                         mode = 0
                         attr = re_sub(attr_pat, '', attr)
                         break
@@ -118,6 +124,8 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
         # The attribute list ends with a valueless attribute like "selected".
         if mode == 1 and not skip:
             attrarr.append(attrname)
+        print(attrarr, file=log, flush=True)
+        print("---complete\n", file=log, flush=True)
         return attrarr
 
     # Return cleaned-up version of XHTML element.
@@ -180,7 +188,7 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
 
         return "<%s%s%s>" % (elem, attr2, xhtml_slash)
         
-    return re_sub(r"""
+    result = re_sub(r"""
     (
     <(?=[^a-zA-Z!/])  # a lone <
     |                 # or
@@ -191,3 +199,5 @@ d of the string
     |                 # or
     >                 # just a >
     )""", filter_xss_split, string, flags=re.X)
+    return result
+
