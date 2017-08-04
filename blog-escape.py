@@ -161,11 +161,13 @@ for nid, title, body, fformat in c:
     body = filter_nl(body)
     with open("%s/%s" % (content_dir, cfn), "w") as content_file:
         content_file.write(body)
+    print("filtering %s..." % (cfn,), end="", flush=True)
     body = run_filter_chain(body, fformat)
     body = filter_urlclean(body, sitename)
     wrapped = wrap_html(body, title=title)
     with open("%s/%s" % (node_dir, nfn), "w") as node_file:
         node_file.write(wrapped)
+    print("done")
     index += '<li>[%s] <a href="/node/%s">%s</a></li>\n' % (nid, nfn, title)
 
 # Generate an index file for the site.
