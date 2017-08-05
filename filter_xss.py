@@ -20,8 +20,22 @@ default_allowed_tags = [
     'ul', 'ol', 'li', 'dl', 'dt', 'dd'
 ]
                          
-log = open("/tmp/blog-escape.log", "w")
-assert log
+# True to turn on log to file.
+xss_logging = False
+
+log = None
+if xss_logging:
+    global log
+    log = open("/tmp/blog-escape.log", "w")
+    assert log
+
+def xss_log(format, *args, **kwargs):
+    if not xss_logging:
+        return
+    nkwargs = dict(kwargs)
+    nkwargs["flush"] = True
+    nkwargs["file"] = log
+    print(format, *args, **nkwargs)
 
 def filter_xss(string, allowed_tags=default_allowed_tags):
     """Return the given HTML-ish content with
@@ -48,7 +62,7 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
     # Process a string of HTML attributes, returning a
     # cleaned-up version.
     def filter_xss_attributes(attr):
-        print("---%s" % (attr,), file=log, flush=True)
+        xss_log("---%s" % (attr,))
         attrarr = list()
         mode = 0
         attrname = None
@@ -56,6 +70,8 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
         while len(attr) != 0:
             # Was the last operation successful?
             working = False
+
+            xss_log("  --%d %s" % (mode, attr))
 
             if mode ==  0:
                 # Attribute name, href for instance.
@@ -124,8 +140,8 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
         # The attribute list ends with a valueless attribute like "selected".
         if mode == 1 and not skip:
             attrarr.append(attrname)
-        print(attrarr, file=log, flush=True)
-        print("---complete\n", file=log, flush=True)
+        xss_log(attrarr, file=log, flush=True)
+        xss_log("---complete\n", file=log, flush=True)
         return attrarr
 
     # Return cleaned-up version of XHTML element.
