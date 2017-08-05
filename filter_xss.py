@@ -7,6 +7,10 @@
 # Sanitize HTML content.
 
 from re_memo import *
+from make_logger import *
+
+# Change to True for logging to stderr
+xss_log = make_logger("filter_xss", False)
 
 # This is a literal-minded port of the corresponding Drupal
 # functionality. Some security-important stuff has been
@@ -20,23 +24,6 @@ default_allowed_tags = [
     'ul', 'ol', 'li', 'dl', 'dt', 'dd'
 ]
                          
-# True to turn on log to file.
-xss_logging = False
-
-log = None
-if xss_logging:
-    global log
-    log = open("/tmp/blog-escape.log", "w")
-    assert log
-
-def xss_log(format, *args, **kwargs):
-    if not xss_logging:
-        return
-    nkwargs = dict(kwargs)
-    nkwargs["flush"] = True
-    nkwargs["file"] = log
-    print(format, *args, **nkwargs)
-
 def filter_xss(string, allowed_tags=default_allowed_tags):
     """Return the given HTML-ish content with
        dangerous "XSS" content stripped and
@@ -146,8 +133,8 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
         # The attribute list ends with a valueless attribute like "selected".
         if mode == 1 and not skip:
             attrarr.append(attrname)
-        xss_log(attrarr, file=log, flush=True)
-        xss_log("---complete\n", file=log, flush=True)
+        xss_log(attrarr)
+        xss_log("---complete\n")
         return attrarr
 
     # Return cleaned-up version of XHTML element.
