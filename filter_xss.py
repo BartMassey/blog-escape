@@ -75,14 +75,20 @@ def filter_xss(string, allowed_tags=default_allowed_tags):
 
             if mode ==  0:
                 # Attribute name, href for instance.
-                match = re_match(r'^([-a-zA-Z]+)', attr)
+                # BCM: Here and just below, added _
+                # to id pattern. Apparently something
+                # in Drupal is already expected to have
+                # transformed it into - before we get here?
+                # Or maybe we're traversing the filters
+                # in the wrong order, or something?
+                match = re_match(r'^([-_a-zA-Z]+)', attr)
                 if match:
                     attrname = match.group(1).lower()
                     # BCM: 'on' ???
                     skip = attrname == 'style' or attrname[0:2] == 'on'
                     working = True
                     mode = 1
-                    attr = re_sub('^[-a-zA-Z]+', '', attr)
+                    attr = re_sub('^[-_a-zA-Z]+', '', attr)
 
             elif mode == 1:
                 # Equals sign or valueless ("selected").
