@@ -89,7 +89,7 @@ def register_filters():
                 if supported_filters[fi]:
                     function, suffix = supported_filters[fi]
                     settings = phpserialize.loads(fs, decode_strings=True)
-                    format_filters.append((function, settings))
+                    format_filters.append((fi, function, settings))
                     if not suffix:
                         continue
                     if suffix[-1] == '.':
@@ -132,7 +132,8 @@ def run_filter_chain(content, fformat):
        appropriate arguments.
     """
     assert fformat in filters
-    for function, settings in filters[fformat]:
+    for finame, function, settings in filters[fformat]:
+        main_log("run", finame, settings)
         content = function(content, **settings)
     return content
 
@@ -165,13 +166,13 @@ for nid, title, body, fformat in c:
     body = filter_nl(body)
     with open("%s/%s" % (content_dir, cfn), "w") as content_file:
         content_file.write(body)
-    main_log("filtering %s..." % (cfn,), end="")
+    main_log("filtering %s..." % (cfn,))
     body = run_filter_chain(body, fformat)
     body = filter_urlclean(body, sitename)
     wrapped = wrap_html(body, title=title)
     with open("%s/%s" % (node_dir, nfn), "w") as node_file:
         node_file.write(wrapped)
-    main_log("done")
+    main_log("... %s done" % (cfn,))
     index += '<li>[%s] <a href="/node/%s">%s</a></li>\n' % (nid, nfn, title)
 
 # Generate an index file for the site.
