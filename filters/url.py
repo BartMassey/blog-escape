@@ -1,4 +1,7 @@
 # Copyright (c) 2017 Bart Massey
+# This work is available under the "MIT license".
+# Please see the file COPYING in this distribution
+# for license terms.
 
 # Port of Drupal's `filter_url()` from `filter.module` to Python.
 

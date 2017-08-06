@@ -25,13 +25,13 @@ import phpserialize
 import MySQLdb
 import MySQLdb.cursors
 
-from filter_nl import filter_nl
-from filter_autop import filter_autop
-from filter_urlclean import filter_urlclean
-from filter_url import filter_url
-from filter_md import filter_md
-from filter_txt import filter_txt
-from filter_html import filter_html, filter_html_escape
+from filters.nl import filter_nl
+from filters.autop import filter_autop
+from filters.urlclean import filter_urlclean
+from filters.url import filter_url
+from filters.md import filter_md
+from filters.txt import filter_txt
+from filters.html import filter_html, filter_html_escape
 from wrap_html import wrap_html
 from make_logger import *
 

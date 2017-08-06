@@ -1,4 +1,7 @@
 # Copyright (c) 2017 Bart Massey
+# This work is available under the "MIT license".
+# Please see the file COPYING in this distribution
+# for license terms.
 
 # Port of Drupal's `_filter_autop.php` to Python.
 
@@ -6,8 +9,7 @@
 # http://greenash.net.au/thoughts/2010/05/an-autop-django-template-filter/
 
 import re
-# This provides memoized implementations of some re
-# functions to avoid recompiling on every run.
+
 from re_memo import *
 
 # Originally based on: http://photomatt.net/scripts/autop

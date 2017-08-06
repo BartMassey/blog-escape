@@ -1,4 +1,7 @@
 # Copyright (c) 2017 Bart Massey
+# This work is available under the "MIT license".
+# Please see the file COPYING in this distribution
+# for license terms.
 
 # Version of Drupal's `filter_html()` and
 # `filter_html_escape()` from `filter.module`.
@@ -6,7 +9,7 @@
 import sys
 import html
 
-from filter_xss import *
+from filters.xss import *
 
 ignored_nofollow = False
 
