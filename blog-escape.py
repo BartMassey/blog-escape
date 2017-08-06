@@ -82,7 +82,7 @@ def register_filters():
         c = db.cursor()
         c.execute("""SELECT module, name, settings FROM filter
                      WHERE format = %s AND status = 1
-                     ORDER BY weight DESC""", (fformat,))
+                     ORDER BY weight ASC""", (fformat,))
         for fm, fn, fs in c:
             fi = fm + "." + fn
             if fi in supported_filters:

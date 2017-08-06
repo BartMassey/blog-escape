@@ -11,6 +11,7 @@
 import re
 
 from re_memo import *
+from filters.xss import *
 
 # Originally based on: http://photomatt.net/scripts/autop
 #     
@@ -21,6 +22,9 @@ from re_memo import *
 # are from the original source, unless marked with BCM.
 def filter_autop(text, **settings):
     """Convert line breaks into <p> and <br> in an intelligent fashion."""
+
+    # Canonicalize.
+    text = filter_xss_admin(text)
 
     # All block level tags
     block = '(?:table|thead|tfoot|caption|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|form|blockquote|address|p|h[1-6]|hr)'

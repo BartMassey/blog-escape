@@ -209,3 +209,20 @@ d of the string
     )""", filter_xss_split, string, flags=re.X)
     return result
 
+# All tags that should be clean and OK.
+admin_tags = [
+    'a', 'abbr', 'acronym', 'address', 'article', 'aside',
+    'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption',
+    'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del',
+    'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption',
+    'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li',
+    'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre',
+    'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section',
+    'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table',
+    'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt',
+    'u', 'ul', 'var', 'wbr' ]
+
+def filter_xss_admin(string):
+    """Do minimal filtering and format canonicalization."""
+    return filter_xss(string, allowed_tags=admin_tags)

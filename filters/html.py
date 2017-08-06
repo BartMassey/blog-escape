@@ -19,7 +19,9 @@ def filter_html(text, allowed_html,
     if filter_html_nofollow != 0 and not ignored_nofollow:
         print("filter_html: warning: cannot nofollow", file=sys.stderr)
         ignored_nofollow = True
-    return filter_xss(text, allowed_tags=allowed_html)
+    allowed_tags = re_split(r'\s+|<|>', allowed_html)
+    allowed_tags = [t for t in allowed_tags if t != '']
+    return filter_xss(text, allowed_tags=allowed_tags)
 
 def filter_html_escape(text, **settings):
     return html.escape(text)
