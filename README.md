@@ -17,10 +17,10 @@ working again the other day, with no obvious intervention on
 my part. I'm still going to finish this project, though.)
 
 Blog Escape is written in Python 3 and currently targeted at
-Drupal 7 Postgres content.
+Drupal 7 MySQL content.
 
 This is a work in progress. Its current functionality is
-nonexistent, and its design is still in flux.
+minimal, and its design is still in flux.
 
 ## How To Use
 
@@ -28,11 +28,12 @@ We will assume that the domain name of your sitename is
 `drupal.example.org`.
 
 1.  This software requires the Python 3 `MySQLDB`
-    module. Install it from your distro or with `pip3`.
-    It also requires the `mistune` Markdown parser.
-    Same deal.
+    module. Install it from your distro or with `pip3`.  It
+    also requires the `mistune` Markdown parser, the
+    `bbcode` BBCode parser and the `phpserialize` PHP
+    deserializer, which can be installed in the same way.
 
-1.  You may want to create a fresh copy of the Drupal
+1.  You will want to create a fresh copy of the Drupal
     database, just to avoid accidents. This should not be
     necessary, but better safe than sorry. Use `mysql-dump`
     and then restore the database into its new home.
@@ -66,9 +67,9 @@ We will assume that the domain name of your sitename is
 
 1. Run `python3 blog-escape.py drupal.example.org`.
 
-1. Move the resulting `nodes` and `files` directory to the
-   root of your new archive website. Adjust your webserver
-   configuration as needed.
+1. Move the resulting `site` directory to the root of your
+   new archive website. Adjust your webserver configuration
+   as needed.
 
 ## Useful Links
 
@@ -80,23 +81,18 @@ We will assume that the domain name of your sitename is
 ## Status
 
 See the GitHub
-[Development](https://github.com/BartMassey/blog-escape/projects/1)
+[Development](http://github.com/BartMassey/blog-escape/projects/1)
 Project Board for pending and completed development tasks.
 
 ## Limitations
 
-* Right now, some of the details of content formats as
-  encoded in the tool are pretty heuristic.  There
-  should be a configurable mechanism for mapping content
-  formats to extensions.
-
-* Ideally, all of the Drupal extension filters should be
-  replicated and applied in the specified order, but this
-  would be a ton of work.
-
 * Currently only works (read "has been tested") for Drupal
   sites that use a site-specific domain name for the root
   URL.
+
+* Please see the GitHub
+  [Issues](http://github.com/BartMassey/blog-escape/issues)
+  for other pending issues.
 
 ## License
 
