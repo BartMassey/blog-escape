@@ -35,8 +35,40 @@ We will assume that the domain name of your sitename is
 
 1.  You will want to create a fresh copy of the Drupal
     database, just to avoid accidents. This should not be
-    necessary, but better safe than sorry. Use `mysql-dump`
-    and then restore the database into its new home.
+    necessary, but better safe than sorry. If you're not
+    familiar with creating a MySQL database, you may want to
+    look at the
+    [manual](https://dev.mysql.com/doc/refman/5.7/en/database-use.html)
+    before you start.
+
+    Create the database and user like this:
+
+    ```
+    mysql <<<'EOF'
+    CREATE DATABASE example_database;
+    GRANT ALL ON example_database.*
+      TO 'example_user'@'localhost'
+      IDENTIFIED BY "example_password";
+    EOF
+    ```
+
+1.  Create `drupal-example-org.my.cnf` with the username,
+    database name and password.
+   
+    ```
+    [client]
+    user="example_user"
+    database="example_database"
+    password="example_password"
+    ```
+
+1.  Use `mysql-dump` from your old database
+    and then restore the dump into a new database
+    using the config file you just created.
+
+    ```
+    mysql --defaults-extra-file=drupal-example-org.my.cnf <dump.sql
+    ```
 
     **Danger:** your old Drupal database and the new one are
     probably both completely screwed up with respect to the
@@ -54,16 +86,6 @@ We will assume that the domain name of your sitename is
     collisions between images with different content. You
     can also remove the `files` → `.` symbolic link if you
     have one and would like.
-
-1.  Create `drupal-example-org.my.cnf` with the username,
-    database name and password of the Drupal database.
-   
-    ```
-    [client]
-    user="example_user"
-    database="example_database"
-    password="example_password"
-    ```
 
 1. Run `python3 blog-escape.py drupal.example.org`.
 
