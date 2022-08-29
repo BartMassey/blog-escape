@@ -6,8 +6,7 @@
 # Format Markdown content.
 
 import mistune
-
-markdown = mistune.Markdown()
+markdown = mistune.create_markdown()
 
 # Return a properly-formatted version of
 # the given Markdown content.
